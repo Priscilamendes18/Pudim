@@ -1,0 +1,43 @@
+name: Pipeline CI/CD - Projeto Fatec
+
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      # Login no Docker Hub usando as Secrets configuradas no GitHub
+      - name: Login no Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASS }}
+
+      # Build e Push da Imagem para o repositório 'pudim' no Docker Hub
+      - name: Build e Push da Imagem
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKER_USER }}/pudim:latest
+
+  test:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login no Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASS }}
+
+      # Testa a execução da imagem criada
+      - name: Rodar container para validação
+        run: docker run ${{ secrets.DOCKER_USER }}/pudim:latest
