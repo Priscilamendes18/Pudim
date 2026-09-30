@@ -13,14 +13,12 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
 
-      # Login no Docker Hub usando as Secrets configuradas no GitHub
       - name: Login no Docker Hub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASS }}
 
-      # Build e Push da Imagem para o repositório 'pudim' no Docker Hub
       - name: Build e Push da Imagem
         uses: docker/build-push-action@v5
         with:
@@ -38,6 +36,9 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_PASS }}
 
-      # Testa a execução da imagem criada
-      - name: Rodar container para validação
-        run: docker run ${{ secrets.DOCKER_USER }}/pudim:latest
+      # Inicia o container em segundo plano (-d) e valida se o Nginx está a responder
+      - name: Validar container em execução
+        run: |
+          docker run -d -p 80:80 --name test-container ${{ secrets.DOCKER_USER }}/pudim:latest
+          sleep 3
+          curl -f http://localhost:80 || exit 1
