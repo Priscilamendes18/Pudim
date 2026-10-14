@@ -57,4 +57,4 @@ jobs:
           script: |
             docker pull ${{ secrets.DOCKER_USER }}/pudim:latest
             docker rm -f app-pudim || true
-            docker run -d --name app-pudim -p 8088:80 --restart unless-stopped ${{ secrets.DOCKER_USER }}/pudim:latest
+            docker run -d --name app-pudim -p 8075:80 --restart unless-stopped ${{ secrets.DOCKER_USER }}/pudim:latest
