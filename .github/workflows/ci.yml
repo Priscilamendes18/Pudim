@@ -42,3 +42,19 @@ jobs:
           docker run -d -p 80:80 --name test-container ${{ secrets.DOCKER_USER }}/pudim:latest
           sleep 3
           curl -f http://localhost:80 || exit 1
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    # environment: production # Opcional: habilita ambiente com aprovação manual no GitHub
+    steps:
+      - name: Implantar na VM via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.AZURE_VM_HOST }}
+          username: ${{ secrets.AZURE_VM_USER }}
+          key: ${{ secrets.AZURE_VM_SSH_KEY }}
+          script: |
+            docker pull ${{ secrets.DOCKER_USER }}/pudim:latest
+            docker rm -f app-pudim || true
+            docker run -d --name app-pudim -p 8088:80 --restart unless-stopped ${{ secrets.DOCKER_USER }}/pudim:latest
