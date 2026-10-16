@@ -1,5 +1,6 @@
+
 FROM nginx:alpine
 
-COPY app /usr/share/nginx/html
+COPY app/pudim.html /usr/share/nginx/html/index.html
 
 EXPOSE 80
